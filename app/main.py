@@ -1,12 +1,16 @@
-import os, sys, time, json
+import json
+import os
+import sys
+import time
+
 import psycopg
 
 # Environment variables with defaults
 DB_HOST = os.getenv("DB_HOST", "db")
 DB_PORT = int(os.getenv("DB_PORT", "5432"))
-DB_USER = ...
-DB_PASS = ...
-DB_NAME = ...
+DB_USER = os.getenv("DB_USER", "appuser")
+DB_PASS = os.getenv("DB_PASS", "secretpw")
+DB_NAME = os.getenv("DB_NAME", "appdb")
 TOP_N = int(os.getenv("APP_TOP_N", "5"))
 
 
@@ -35,23 +39,28 @@ def main():
     conn = connect_with_retry()
     with conn, conn.cursor() as cur:
         # Total number of trips
-        cur.execute("...")
+        cur.execute("SELECT COUNT(*) FROM trips")
         total_trips = cur.fetchone()[0]
 
         # Average fare by city
         cur.execute("""
-        ...
-        ...
-        ...
-        ...
+        SELECT city, AVG(fare) FROM trips
+        GROUP BY(city)
         """)
         by_city = [{"city": c, "avg_fare": float(a)} for (c, a) in cur.fetchall()]
 
         # Top N trips by DEFINE YOUR QUERY
         cur.execute("""
-        ...
+            SELECT city, minutes, fare
+            FROM trips
+            ORDER BY minutes DESC
+            LIMIT %s
         """, (TOP_N,))
-        top = ...
+
+        top = [
+            {"city": c, "minutes": m, "fare": float(f)}
+            for (c, m, f) in cur.fetchall()
+        ]
 
         summary = {
             "total_trips": int(total_trips),

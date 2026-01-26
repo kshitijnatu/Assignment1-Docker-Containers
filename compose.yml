@@ -21,7 +21,11 @@ services:
       db:
         condition: service_healthy
     environment:
-      ...
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_USER: appuser
+      DB_PASS: secretpw
+      DB_NAME: appdb
       APP_TOP_N: "10"
     volumes:
       - ./out:/out
