@@ -172,3 +172,8 @@ Implementation is in [`app/main.py`](app/main.py).
 ```
 
 ## Reflection Of Assignment
+### What I learned
+I learned how to create a Dockerfile and add all of the commands to create multiple containers for a simple python application. I also learned how to coordinate multiple containers with Docker Compose to ensure that the application runs smoothly and as intended. Another thing I learned is how to create a README.md file so that I can document how the application works and what commands are needed to successfully run the application.
+
+### What I would improve
+I would create a .env file so that I do not hardcode any credentials in my [`compose.yml`](compose.yml), which would make it easier to change configurations without editing the Compose file, and I would also add more structured logging (with clear connection attempts and output file paths) to improve observability and debugging.
