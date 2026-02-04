@@ -171,6 +171,49 @@ Implementation is in [`app/main.py`](app/main.py).
 }
 ```
 
+## Troubleshooting
+
+### DB not ready / app fails to connect
+Even with `depends_on`, the DB can take a few seconds to accept connections.
+
+Things to try:
+- Check container status: `docker compose ps`
+- Inspect logs:
+  - DB: `docker compose logs -f db`
+  - App: `docker compose logs -f app`
+- Verify Postgres readiness from inside the DB container:
+  - `docker compose exec db pg_isready -U $DB_USER -d $DB_NAME`
+- If you see repeated connection retries, bring the stack down and restart:
+  - `docker compose down`
+  - `docker compose up --build`
+
+If you changed `db/init.sql` and don’t see new data, remember that Postgres only runs init scripts on a **fresh** data volume. Reset volumes and retry:
+- `docker compose down -v`
+- `docker compose up --build`
+
+### Permission errors writing to `out/`
+The app writes to `/out/summary.json` inside the container, bind-mounted to `./out/summary.json` on your machine. If the file/folder is not writable you may see errors like “Permission denied”.
+
+Fixes:
+- Recreate the folder:
+  - `rm -rf out && mkdir -p out`
+- Ensure it’s writable:
+  - `chmod -R u+rwX out`
+
+
+### Port conflict on 5432
+If you already have Postgres running locally, Compose may fail to bind the port.
+
+Fixes:
+- Stop the local service using 5432, or
+- Change the host port mapping in `compose.yml` (e.g., map to `5433:5432`).
+
+### Output file not created
+If `out/summary.json` doesn’t appear:
+- Confirm the app container actually ran and exited: `docker compose ps`
+- Check app logs: `docker compose logs app`
+- Ensure the bind mount path in `compose.yml` points to `./out/summary.json` and that the `out/` directory exists.
+
 ## Reflection Of Assignment
 ### What I learned
 I learned how to create a Dockerfile and add all of the commands to create multiple containers for a simple python application. I also learned how to coordinate multiple containers with Docker Compose to ensure that the application runs smoothly and as intended. Another thing I learned is how to create a README.md file so that I can document how the application works and what commands are needed to successfully run the application.
